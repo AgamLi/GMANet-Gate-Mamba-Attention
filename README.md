@@ -86,6 +86,16 @@ PSFH2023
 ├── test.txt
 ```
 
+### Requirements
+We highly suggest using our provided dependencies to ensure reproducibility:
+```
+# Environments:
+cuda==12.1
+python==3.10
+# Dependencies:
+pip install -r requirements.txt
+```
+
 ### Training
 - To train the model of GMANet, run: `train.py`.
 
