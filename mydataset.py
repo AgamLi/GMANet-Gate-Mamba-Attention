@@ -25,18 +25,18 @@ import SimpleITK as sitk
 def resize_image_itk(itkimage, newSize, resamplemethod=sitk.sitkNearestNeighbor):
     resampler = sitk.ResampleImageFilter()
 
-    originSize = itkimage.GetSize()  # 获取原图size
-    originSpacing = itkimage.GetSpacing()  # 获取原图spacing
+    originSize = itkimage.GetSize() 
+    originSpacing = itkimage.GetSpacing()  
     newSize = np.array(newSize, dtype='uint32')
     factor = originSize / newSize
     newSpacing = originSpacing * factor
 
-    resampler.SetReferenceImage(itkimage)  # 指定需要重新采样的目标图像
+    resampler.SetReferenceImage(itkimage)  
     resampler.SetSize(newSize.tolist())
     resampler.SetOutputSpacing(newSpacing.tolist())
     resampler.SetTransform(sitk.Transform(3, sitk.sitkIdentity))
     resampler.SetInterpolator(resamplemethod)
-    itkimgResampled = resampler.Execute(itkimage)  # 得到重新采样后的图像
+    itkimgResampled = resampler.Execute(itkimage) 
     itkimgResampled.SetOrigin(itkimage.GetOrigin())
     itkimgResampled.SetSpacing(itkimage.GetSpacing())
     itkimgResampled.SetDirection(itkimage.GetDirection())
@@ -55,7 +55,7 @@ def correct_dims(*images):
     # print(images)
     for img in images:
         if len(img.shape) == 2:
-            corr_images.append(np.expand_dims(img, axis=2))  ## 原本axis=2 改成了0
+            corr_images.append(np.expand_dims(img, axis=2)) 
         else:
             corr_images.append(img)
     if len(corr_images) == 1:
