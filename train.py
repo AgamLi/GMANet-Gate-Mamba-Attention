@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 from utils import DiceLoss,MyDC,DCloss
 from mydataset import JointTransform2D, Fetal_dataset
-from my_model.Model import Model
+from my_models.Model import Model
 
 
 
@@ -33,7 +33,7 @@ def parse_args():
 
     # basic parameters
     parser.add_argument('--name', default=None, help='model name')
-    parser.add_argument('--epochs', default=100, type=int, metavar='N', help='number of total epochs to run')
+    parser.add_argument('--epochs', default=2, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('-b', '--batch_size', default=32, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--num_workers', default=8, type=int, help='number of data loading workers')
     parser.add_argument('--seed', default=42, type=int, help='random seed')
@@ -127,8 +127,6 @@ def main():
         yaml.dump(config, f)
 
 
-
-
     # create model
     model = Model(num_classes=config['num_classes']).cuda()
 
@@ -214,9 +212,11 @@ def main():
     trigger = 0
 
     
-    
+    import time
+
     for epoch in range(start_epoch + 1, max_epoch + 1):
         # train for one epoch
+        epoch_start_time = time.time()
         model.train()
         total_batches = len(trainloader)
         pbar = tqdm(enumerate(trainloader), total=total_batches, ncols=120, desc='Training Progress', 
@@ -238,6 +238,8 @@ def main():
 
         # update learning rate
         scheduler.step()
+        train_elapsed_time = time.time() - epoch_start_time
+        print(f"per epoch time: {train_elapsed_time:.2f}s")
 
         # evaluate on validation set
         if epoch >= 1:
