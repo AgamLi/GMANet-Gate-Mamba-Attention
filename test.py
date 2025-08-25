@@ -11,24 +11,24 @@ import SimpleITK
 import cv2
 from tqdm import tqdm
 import SimpleITK as sitk
-from my_model.Model import Model
+from my_models.Model import Model
 
 
 def resize_image_itk(itkimage, newSize, resamplemethod=sitk.sitkNearestNeighbor):
     resampler = sitk.ResampleImageFilter()
 
-    originSize = itkimage.GetSize()  # 获取原图size
-    originSpacing = itkimage.GetSpacing()  # 获取原图spacing
+    originSize = itkimage.GetSize()  
+    originSpacing = itkimage.GetSpacing()  
     newSize = np.array(newSize, dtype='uint32')
     factor = originSize / newSize
     newSpacing = originSpacing * factor
 
-    resampler.SetReferenceImage(itkimage)  # 指定需要重新采样的目标图像
+    resampler.SetReferenceImage(itkimage)  
     resampler.SetSize(newSize.tolist())
     resampler.SetOutputSpacing(newSpacing.tolist())
     resampler.SetTransform(sitk.Transform(3, sitk.sitkIdentity))
     resampler.SetInterpolator(resamplemethod)
-    itkimgResampled = resampler.Execute(itkimage)  # 得到重新采样后的图像
+    itkimgResampled = resampler.Execute(itkimage)  
     itkimgResampled.SetOrigin(itkimage.GetOrigin())
     itkimgResampled.SetSpacing(itkimage.GetSpacing())
     itkimgResampled.SetDirection(itkimage.GetDirection())
@@ -90,7 +90,9 @@ def main():
 
     # load model
     ckpt = os.listdir(f"./checkpoints/")[-1]
+
     model = Model(num_classes=config['num_classes']).cuda()
+    
     model.load_state_dict(torch.load(f"./checkpoints/{ckpt}"))
     print(f"Loaded model:{ckpt}")
     model.to(device)
@@ -120,6 +122,8 @@ def main():
 
 
     # test the model
+    import time
+    epoch_start_time = time.time()
     with torch.no_grad():
         model.eval()
         a=0
@@ -135,7 +139,8 @@ def main():
                 cv2.imwrite(f"./pred/{a + 1}.png", pred)
                 cv2.imwrite(f"./gt/{a + 1}.png", label)
                 a=a+1
-
+    train_elapsed_time = time.time() - epoch_start_time
+    print(f"inference time: {train_elapsed_time:.2f} seconds")
 
 if __name__ == '__main__':
     main()
