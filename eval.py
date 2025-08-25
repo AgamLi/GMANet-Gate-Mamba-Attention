@@ -9,7 +9,6 @@ from ellipse import drawline_AOD
 from pathlib import Path
 from tqdm import tqdm
 
-# 是否开启本地测试
 IS_LOCAL_TEST = False
 
 
@@ -26,7 +25,7 @@ class Evaluation:
         return image
 
     def evaluation(self, pred: SimpleITK.Image, label: SimpleITK.Image):
-        # 计算aop
+        # aop
         pred_aop = self.cal_aop(pred)
         label_aop = self.cal_aop(label)
         aop = abs(pred_aop - label_aop)
@@ -47,7 +46,7 @@ class Evaluation:
         elif label_aop < 120 and pred_aop >= 120:
             result['FP'] = 1
         result['aop'] = float(aop)
-        # 计算耻骨指标
+        # ps
         pred_data_ps = SimpleITK.GetArrayFromImage(pred)
         pred_data_ps[pred_data_ps == 2] = 0
         pred_ps = SimpleITK.GetImageFromArray(pred_data_ps)
@@ -64,7 +63,7 @@ class Evaluation:
             result['dice_ps'] = float(self.cal_dsc(pred_ps, label_ps))
             result['hd_ps'] = float(self.cal_hd(pred_ps, label_ps))
 
-        # 计算胎头指标
+        # fh
         pred_data_head = SimpleITK.GetArrayFromImage(pred)
         pred_data_head[pred_data_head == 1] = 0
         pred_data_head[pred_data_head == 2] = 1
@@ -84,7 +83,7 @@ class Evaluation:
             result['dice_fh'] = float(self.cal_dsc(pred_head, label_head))
             result['hd_fh'] = float(self.cal_hd(pred_head, label_head))
 
-        # 计算总体指标
+        # all
         pred_data_all = SimpleITK.GetArrayFromImage(pred)
         pred_data_all[pred_data_all == 2] = 1
         pred_all = SimpleITK.GetImageFromArray(pred_data_all)
@@ -127,9 +126,9 @@ class Evaluation:
             f.write(json.dumps(metrics))
 
     def cal_asd(self, a, b):
-        filter1 = SimpleITK.SignedMaurerDistanceMapImageFilter()  # 于计算二值图像中像素到最近非零像素距离的算法
-        filter1.SetUseImageSpacing(True)  # 计算像素距离时要考虑像素之间的间距
-        filter1.SetSquaredDistance(False)  # 计算距离时不要对距离进行平方处理
+        filter1 = SimpleITK.SignedMaurerDistanceMapImageFilter()  
+        filter1.SetUseImageSpacing(True)  
+        filter1.SetSquaredDistance(False) 
         a_dist = filter1.Execute(a)
         a_dist = SimpleITK.GetArrayFromImage(a_dist)
         a_dist = np.abs(a_dist)
